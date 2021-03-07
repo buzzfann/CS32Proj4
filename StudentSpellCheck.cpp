@@ -1,31 +1,68 @@
-//
-//  StudentSpellCheck.cpp
-//  Project4
-//
-//  Created by Buzz Fann on 3/3/21.
-//
-
 #include "StudentSpellCheck.h"
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
+using namespace std;
+
+const int APOSTROPHE = 39;
 SpellCheck* createSpellCheck()
 {
-    return new StudentSpellCheck;
+	return new StudentSpellCheck;
 }
 
 StudentSpellCheck::~StudentSpellCheck() {
-    // TODO
+	// TODO
 }
 
-bool StudentSpellCheck::load(std::string dictionaryFile) {
-    return false; // TODO
+bool StudentSpellCheck::load(std::string dictionaryFile)
+{
+    ifstream infile(dictionaryFile);
+    // check if valid
+    if (!infile)
+    {
+        return false;
+    }
+    string s;
+    while (getline(infile, s))
+    {
+        bool add = true;
+        
+        //convert them all to lowercase
+        for (int i = 0; i < s.size(); i++) {
+            if (!isalpha(s[i]) && s[i] != APOSTROPHE)
+            {
+                add = false; //if not an allowed character
+                break;
+            }
+            s[i] = tolower(s[i]);
+        }
+        if (add)
+        {
+
+            Node* curr = m_trie->getRoot();
+            for (int i = 0; i < s.length(); i++)
+            {
+                if (curr->children[s[i]  - 'a'] == nullptr) // 97 is ascii for a
+                {
+                    // create new node
+                    curr->children[s[i]  - 'a'] = new Node(s[i]);
+                }
+                // go to next node
+                curr = curr->children[s[i]  - 'a'];
+            }
+            curr->isWord = true;
+        }
+    }
+    return true;
 }
 
 bool StudentSpellCheck::spellCheck(std::string word, int max_suggestions, std::vector<std::string>& suggestions) {
-    return false; // TODO
+	return false; // TODO
 }
 
 void StudentSpellCheck::spellCheckLine(const std::string& line, std::vector<SpellCheck::Position>& problems) {
-    // TODO
+	// TODO
 }
+
