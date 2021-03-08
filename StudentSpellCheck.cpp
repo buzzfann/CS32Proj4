@@ -40,19 +40,19 @@ bool StudentSpellCheck::load(std::string dictionaryFile)
         }
         if (add)
         {
-
-            Node* curr = m_trie->getRoot();
-            for (int i = 0; i < s.length(); i++)
-            {
-                if (curr->children[s[i]  - 'a'] == nullptr) // 97 is ascii for a
-                {
-                    // create new node
-                    curr->children[s[i]  - 'a'] = new Node(s[i]);
-                }
-                // go to next node
-                curr = curr->children[s[i]  - 'a'];
-            }
-            curr->isWord = true;
+            dictSet.insert(s);
+//            Node* curr = m_trie->getRoot();
+//            for (int i = 0; i < s.length(); i++)
+//            {
+//                if (curr->children[s[i]  - 'a'] == nullptr) // 97 is ascii for a
+//                {
+//                    // create new node
+//                    curr->children[s[i]  - 'a'] = new Node(s[i]);
+//                }
+//                // go to next node
+//                curr = curr->children[s[i]  - 'a'];
+//            }
+//            curr->isWord = true;
         }
     }
     return true;
@@ -60,6 +60,8 @@ bool StudentSpellCheck::load(std::string dictionaryFile)
 
 bool StudentSpellCheck::spellCheck(std::string word, int max_suggestions, std::vector<std::string>& suggestions) {
 	return false; // TODO
+    
+    // make it to lower
 }
 
 void StudentSpellCheck::spellCheckLine(const std::string& line, std::vector<SpellCheck::Position>& problems) {

@@ -1,9 +1,3 @@
-//
-//  StudentUndo.hpp
-//  Project4
-//
-//  Created by Buzz Fann on 3/3/21.
-//
 #ifndef STUDENTUNDO_H_
 #define STUDENTUNDO_H_
 
@@ -12,13 +6,12 @@
 class StudentUndo : public Undo {
 public:
 
-    void submit(Action action, int row, int col, char ch = 0);
-    Action get(int& row, int& col, int& count, std::string& text);
-    void clear();
+	void submit(Action action, int row, int col, char ch = 0);
+	Action get(int& row, int& col, int& count, std::string& text);
+	void clear();
 
 private:
 
 };
 
 #endif // STUDENTUNDO_H_
-

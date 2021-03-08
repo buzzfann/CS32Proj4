@@ -26,9 +26,10 @@ public:
 
 private:
     std::list<std::string> textList;
-    int posX;
-    int posY = 0;
+    int m_col;
+    int m_row;
     Undo* undObj;
+    std::list<std::string>::iterator it;
     
     
 };

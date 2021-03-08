@@ -1,26 +1,18 @@
-//
-//  StudentUndo.cpp
-//  Project4
-//
-//  Created by Buzz Fann on 3/3/21.
-//
-
 #include "StudentUndo.h"
 
 Undo* createUndo()
 {
-    return new StudentUndo;
+	return new StudentUndo;
 }
 
 void StudentUndo::submit(const Action action, int row, int col, char ch) {
-    // TODO
+	// TODO
 }
 
-StudentUndo::Action StudentUndo::get(int &row, int &col, int& count, std::string& text) {
+StudentUndo::Action StudentUndo::get(int& row, int& col, int& count, std::string& text) {
     return Action::ERROR;  // TODO
 }
 
 void StudentUndo::clear() {
-    // TODO
+	// TODO
 }
-
