@@ -7,7 +7,7 @@
 #include <vector>
 #include <set>
 
-const int ALPHABET_SIZE = 26;
+const int ALPHABET_SIZE_APOS = 27;
 
 class StudentSpellCheck : public SpellCheck {
 public:
@@ -27,12 +27,12 @@ private:
     public:
         char c;
         bool isWord;
-        Node* children[ALPHABET_SIZE];
+        Node* children[ALPHABET_SIZE_APOS];
         Node(char c)
         {
             this->c = c;
             isWord = false;
-            for (int i = 0; i < ALPHABET_SIZE; i++)
+            for (int i = 0; i < ALPHABET_SIZE_APOS; i++)
             {
                 this->children[i] = nullptr;
             }

@@ -6,6 +6,8 @@
 
 using namespace std;
 
+///Users/buzzfann/Downloads/Wurd/Wurd/warandpeace.txt
+
 const int APOSTROPHE = 39;
 SpellCheck* createSpellCheck()
 {
@@ -40,19 +42,19 @@ bool StudentSpellCheck::load(std::string dictionaryFile)
         }
         if (add)
         {
-            dictSet.insert(s);
-//            Node* curr = m_trie->getRoot();
-//            for (int i = 0; i < s.length(); i++)
-//            {
-//                if (curr->children[s[i]  - 'a'] == nullptr) // 97 is ascii for a
-//                {
-//                    // create new node
-//                    curr->children[s[i]  - 'a'] = new Node(s[i]);
-//                }
-//                // go to next node
-//                curr = curr->children[s[i]  - 'a'];
-//            }
-//            curr->isWord = true;
+//            dictSet.insert(s);
+            Node* curr = m_trie->getRoot();
+            for (int i = 0; i < s.length(); i++)
+            {
+                if (curr->children[s[i]  - 'a'] == nullptr) // 97 is ascii for a
+                {
+                    // create new node
+                    curr->children[s[i]  - 'a'] = new Node(s[i]);
+                }
+                // go to next node
+                curr = curr->children[s[i]  - 'a'];
+            }
+            curr->isWord = true;
         }
     }
     return true;
