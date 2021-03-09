@@ -116,7 +116,14 @@ void StudentTextEditor::move(Dir dir) {
             else
             {
                 it--;
-                m_col = (*it).length() - 1;
+                if ((*it).length() != 0)
+                {
+                    m_col = (*it).length() - 1;
+                }
+                else
+                {
+                    m_col = 0;
+                }
                 m_row--;
             }
             break;
@@ -128,7 +135,8 @@ void StudentTextEditor::move(Dir dir) {
             else
             {
                 it++;
-                m_col = (*it).length() - 1;
+                // move to first position
+                m_col = 0;
                 m_row++;
             }
             break;
@@ -163,6 +171,8 @@ void StudentTextEditor::del() {
     string temp2 = temp.substr(m_col+1);
     temp = temp.substr(0, m_col) + temp2;
     *it = temp;
+    
+    //implement undo
 }
 
 void StudentTextEditor::backspace() {
@@ -199,6 +209,7 @@ void StudentTextEditor::backspace() {
         *it = temp;
         m_col--;
     }
+    //implement undo
 }
 
 void StudentTextEditor::insert(char ch) {
@@ -218,6 +229,7 @@ void StudentTextEditor::insert(char ch) {
         *it = temp;
         m_col++;
     }
+    //implement undo
 
 }
 
@@ -227,16 +239,27 @@ void StudentTextEditor::enter() {
     list<string>::iterator getRow = it;
     getRow++;
     //split up the line
-    string temp = *it;
-    string temp0 = temp.substr(0, m_col);
-    *it = temp0;
-    temp = temp.substr(m_col);
-    
-    textList.emplace(getRow, temp);
+    // if it's not the last on the line
+    if (m_col != (*it).length() - 1)
+    {
+        string temp = *it;
+        string temp0 = temp.substr(0, m_col);
+        *it = temp0;
+        temp = temp.substr(m_col);
+        
+        textList.emplace(getRow, temp);
+    }
+    else
+    {
+        textList.emplace(getRow, " ");
+    }
+
     it++;
     // increment the row, set m_col to zero
     m_row++;
     m_col = 0;
+    //implement undo
+    //undObj.submit(SPLIT, ...)
 }
 
 void StudentTextEditor::getPos(int& row, int& col) const {
@@ -247,32 +270,6 @@ void StudentTextEditor::getPos(int& row, int& col) const {
 
 int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::string>& lines) const
 {
-//    // if invalid rows
-//    if (startRow < 0 || numRows < 0 || startRow >= lines.size())
-//    {
-//        return -1;
-//    }
-//    // if starting row is the last line of lines
-//    if (startRow == lines.size() - 1)
-//    {
-//        lines.clear();
-//        return 0;
-//    }
-//    // create temp vector container
-//    std::vector<std::string> temp;
-//    std::vector<std::string>::const_iterator start = lines.cbegin() + startRow;
-////    std::vector<std::string>::const_iterator temporary = start;
-//    int i = 0;
-//    // iterate through, decreasing numRows and make sure start isn't at the end
-//    for (; numRows > 0 && start != lines.cend(); start++, numRows--, i++)
-//    {
-//        std::string s = *start;
-////        start = lines.erase(start);
-//        temp.push_back(s);
-//    }
-//    lines.clear();
-//    lines = temp;
-//    return i;
     if (startRow < 0 || numRows < 0 || startRow >= textList.size())
     {
         return -1;
@@ -300,4 +297,63 @@ int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::stri
 
 void StudentTextEditor::undo() {
 	// TODO
+    // if
+    int row = 0;
+    int col = 0;
+    int count = 0;
+    string oldText;
+    Undo::Action job;
+    job = getUndo()->get(row, col, count, oldText);
+    std::list<std::string>::iterator temp = textList.begin();
+    // insert
+    if (job == Undo::Action::INSERT)
+    {
+        // iterate to the row passed
+        for (int i = 0; i < row; i++)
+        {
+            temp++;
+        }
+        temp->insert(col, oldText);
+    }
+    // delete
+    else if (job == Undo::Action::DELETE)
+    {
+        // iterate to the row passed
+        for (int i = 0; i < row; i++)
+        {
+            temp++;
+        }
+        if (col == 0)
+        {
+            temp->erase((*temp).begin());
+        }
+        else
+        {
+            temp->erase((*temp).begin() + col - 1);
+        }
+    }
+    // join
+    else if (job == Undo::Action::JOIN)
+    {
+        for (int i = 0; i < row; i++)
+        {
+            temp++;
+        }
+        //DO
+    }
+    // split
+    else if (job == Undo::Action::SPLIT)
+    {
+        for (int i = 0; i < row; i++)
+        {
+            temp++;
+        }
+        //DO
+    }
+    // if it's error
+    else
+    {
+        return;
+    }
+    
 }

@@ -56,27 +56,8 @@ private:
     };
     
     Trie* m_trie;
-    std::set<std::string> dictSet;
-    
-//    void insert(std::string str)
-//    {
-//        // start at root
-//        Trie* curr = &m_trie;
-//        for (int i = 0; i < str.length(); i++)
-//        {
-//            if (curr->children[str[i]] == nullptr)
-//            {
-//                // create new node
-//                curr->children[str[i]] = new Trie();
-//            }
-//
-//            // go to next node
-//            curr = curr->children[str[i]];
-//        }
-//
-//        // mark the current node as a leaf
-////        curr->isLeaf = true;
-//    }
+    bool search(std::string word, Node* root);
+    void deleteNodes(Node* root);
 };
 
 #endif  // STUDENTSPELLCHECK_H_

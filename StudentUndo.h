@@ -2,6 +2,8 @@
 #define STUDENTUNDO_H_
 
 #include "Undo.h"
+#include <stack>
+#include <string>
 
 class StudentUndo : public Undo {
 public:
@@ -12,6 +14,14 @@ public:
 
 private:
     bool batch;
+    struct undoObj
+    {
+        Action action;
+        int e_row;
+        int e_col;
+        char lastEdited;
+    };
+    std::stack<undoObj> undoStack;
 
 };
 
