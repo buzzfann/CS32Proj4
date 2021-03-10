@@ -158,20 +158,32 @@ void StudentTextEditor::del() {
     // other case
     // just delete a character using substring
     // m_col remains the same
-    if (m_col == (*it).length() - 1)
+    if (m_col == (*it).length() - 1 && m_row != textList.size()-1)
     {
         // merge with the next line
+        // getUndo()->submit(Undo::Action::JOIN, m_row, (*it).length(), ' ');
         std::list<std::string>::iterator next = it;
         next++;
         string nextLine = *next;
         textList.erase(next);
         *it = *it + nextLine;
+        string temp = *it;
+        string temp2 = temp.substr(m_col+1);
+        temp = temp.substr(0, m_col) + temp2;
+        *it = temp;
     }
-    string temp = *it;
-    string temp2 = temp.substr(m_col+1);
-    temp = temp.substr(0, m_col) + temp2;
-    *it = temp;
-    
+    else if (m_col == (*it).length() && m_row == textList.size()-1)
+    {
+        return;
+    }
+    else
+    {
+        // getUndo()
+        (*it).erase((*it).begin() + m_col);
+        textList.insert(it, (*it));
+        it = textList.erase(it);
+        it--;
+    }
     //implement undo
 }
 
@@ -190,11 +202,11 @@ void StudentTextEditor::backspace() {
         string prevLine = *it;
 //        getUndo()->submit(Undo::Action::JOIN, m_row-1, prevLine.length(), ' ');
         // this captures the line minus the last character (which will be deleted)
-        prevLine = prevLine.substr(0, prevLine.length() - 1);
+        prevLine = prevLine.substr(0, prevLine.length());
         *it = prevLine;
         if ((*it).length() != 0)
         {
-            m_col = (*it).length() - 1;
+            m_col = (*it).length();
         }
         // combine it with next line
         *it = *it + *curr;
@@ -275,11 +287,11 @@ void StudentTextEditor::getPos(int& row, int& col) const {
 
 int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::string>& lines) const
 {
-    if (startRow < 0 || numRows < 0 || startRow >= textList.size())
+    if (startRow < 0 || numRows < 0 || startRow > textList.size())
     {
         return -1;
     }
-    if (startRow == textList.size() - 1)
+    if (startRow == textList.size())
     {
         lines.clear();
         return 0;
