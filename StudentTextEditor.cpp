@@ -20,6 +20,8 @@ StudentTextEditor::StudentTextEditor(Undo* undo)
      undObj = undo;
      m_row = 0;
      m_col = 0;
+     textList.push_back("");
+     it = textList.begin();
 }
 
 StudentTextEditor::~StudentTextEditor()
@@ -74,13 +76,6 @@ void StudentTextEditor::reset() {
 }
 
 void StudentTextEditor::move(Dir dir) {
-//    list<string>::iterator getRow = textList.begin();
-//    // move the iterator to position y of the
-//    for (int i = 0; i < m_row; i++)
-//    {
-//        getRow++;
-//    }
-//    string temp = *getRow;
     std::list<std::string>::iterator tempIt = it;
 	// TODO
     switch (dir) {
@@ -97,13 +92,15 @@ void StudentTextEditor::move(Dir dir) {
             }
             break;
         case DOWN:
-            if (tempIt++ != textList.end())
+            tempIt = it;
+            tempIt++;
+            if (tempIt != textList.end())
             {
                 it++;
                 m_row++;
             }
             // check if empty line
-            if ((*it).length() < m_col)
+            else if ((*it).length() < m_col && (*it).length() >=0)
             {
                 m_col = (*it).length() - 1;
             }
@@ -113,7 +110,7 @@ void StudentTextEditor::move(Dir dir) {
             {
                 m_col--;
             }
-            else
+            else if (m_col == 0 && it != textList.begin())
             {
                 it--;
                 if ((*it).length() != 0)
@@ -126,13 +123,16 @@ void StudentTextEditor::move(Dir dir) {
                 }
                 m_row--;
             }
+            // else it's the first position and nothing will happen
             break;
         case Dir::RIGHT:
-            if (m_col < (*it).length() - 1)
+            tempIt = it;
+            tempIt++;
+            if (m_col < (*it).length() - 1 && (*it).length() != 0)
             {
                 m_col++;
             }
-            else
+            else if (tempIt++ != textList.end())
             {
                 it++;
                 // move to first position
@@ -182,15 +182,15 @@ void StudentTextEditor::backspace() {
     // other case
     // just delete a character using substring
     // m_col moves
-    if (m_col == 0)
+    if (m_col == 0 && m_row != 0)
     {
         //merge list with previous list
         std::list<std::string>::iterator curr = it;
         it--;
         string prevLine = *it;
+//        getUndo()->submit(Undo::Action::JOIN, m_row-1, prevLine.length(), ' ');
         // this captures the line minus the last character (which will be deleted)
-        prevLine = prevLine.substr(0, prevLine.length()-1);
-        std::cout << prevLine << std::endl;
+        prevLine = prevLine.substr(0, prevLine.length() - 1);
         *it = prevLine;
         if ((*it).length() != 0)
         {
@@ -201,8 +201,13 @@ void StudentTextEditor::backspace() {
         textList.erase(curr);
         m_row--;
     }
+    else if (m_row == 0 && m_col == 0)
+    {
+        return;
+    }
     else
     {
+//        getUndo()->submit(Undo::Action::DELETE, m_row, m_col-1, (*it).at(m_col-1);
         string temp = *it;
         string temp2 = temp.substr(m_col);
         temp = temp.substr(0, m_col-1) + temp2;
