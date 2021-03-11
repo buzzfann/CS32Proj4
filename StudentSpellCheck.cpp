@@ -93,12 +93,15 @@ bool StudentSpellCheck::load(std::string dictionaryFile)
 bool StudentSpellCheck::search(std::string word, Node* root)
 {
     bool isIn = false;
+    // loop through word length
     for (int i = 0; i < word.length(); i++)
     {
+        // return false if comes across wrong char
         if (!isalpha(word[i]) && word[i] != APOSTROPHE)
         {
             return false;
         }
+        // if comes across apostrophe
         if (word[i] == APOSTROPHE)
         {
             if (root->children[26] != nullptr)
@@ -112,6 +115,7 @@ bool StudentSpellCheck::search(std::string word, Node* root)
                 continue;
             }
         }
+        // otherwise
         else
         {
             // check if the letter is present as a child
@@ -128,7 +132,7 @@ bool StudentSpellCheck::search(std::string word, Node* root)
         }
         break;
     }
-
+    // return true or false depending on if found
     return isIn;
 }
 
@@ -152,6 +156,7 @@ bool StudentSpellCheck::spellCheck(std::string word, int max_suggestions, std::v
         for (int i = 0; i < word.length(); i++)
         {
             char letter = 'a';
+            // loop through the trie looking for proposed words
             for (int j = 0; j < ALPHABET_SIZE_APOS; j++)
             {
                 root = m_trie->getRoot();
@@ -180,13 +185,13 @@ bool StudentSpellCheck::spellCheck(std::string word, int max_suggestions, std::v
 
 void StudentSpellCheck::spellCheckLine(const std::string& line, std::vector<SpellCheck::Position>& problems)
 {
-	// TODO
     // clear problems
     problems.clear();
     int start = 0;
     // iterate through line
     string temp = "";
     string lineTemp = line; // this will end up being a lowercase version of the line
+    // this for loop with two nested while loops is structured to run at most line.length() times
     for (int i = 0; i < line.length(); i++)
     {
         Node* root = m_trie->getRoot();

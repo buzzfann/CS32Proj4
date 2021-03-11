@@ -10,6 +10,7 @@ void StudentUndo::submit(const Action action, int row, int col, char ch) {
 	// TODO
     // switch statement for each action
     std::string last(ch, 1);
+    // allocate memory for undoObj
     undoObj* un = new undoObj(Action::ERROR, row, col, 1, last);
     
     switch(action)
@@ -38,23 +39,27 @@ void StudentUndo::submit(const Action action, int row, int col, char ch) {
             break;
         case Undo::Action::DELETE:
             setFalse(batchIns, batchSplit);
-            
-            if (!undoStack.empty() && undoStack.top()->e_col == col + un->count && batchDel && undoStack.top()->e_row == row) // backspace
+            // check if backspace
+            if (!undoStack.empty() && undoStack.top()->e_col == col + un->count && batchDel && undoStack.top()->e_row == row)
             {
+                // unallocate memory
                 delete un;
                 un = undoStack.top();
                 un->lastEdited = ch + un->lastEdited;
                 un->e_col = col;
                 un->count += 1;
             }
-            else if (!undoStack.empty()&& undoStack.top()->e_col == col && batchDel && undoStack.top()->e_row == row) // delete
+            // check if delete
+            else if (!undoStack.empty()&& undoStack.top()->e_col == col && batchDel && undoStack.top()->e_row == row)
             {
+                // unallocate memory
                 delete un;
                 un = undoStack.top();
                 un->lastEdited = un->lastEdited + ch;
 //                un->e_col = col;
                 un->count += 1;
             }
+            //otherwise
             else
             {
                 un->action = DELETE;
@@ -65,10 +70,11 @@ void StudentUndo::submit(const Action action, int row, int col, char ch) {
                 batchDel = true;
             }
             break;
+        // join
         case Undo::Action::JOIN:
             setFalse(batchDel, batchIns);
             batchSplit = false;
-
+            // set variables
             un->action = JOIN;
             un->e_row = row;
             un->e_col = col;
@@ -77,6 +83,7 @@ void StudentUndo::submit(const Action action, int row, int col, char ch) {
             break;
         case Undo::Action::SPLIT:
             setFalse(batchDel, batchIns);
+            // set variables
             un->action = SPLIT;
             un->e_row = row;
             un->e_col = col;
@@ -89,11 +96,14 @@ void StudentUndo::submit(const Action action, int row, int col, char ch) {
 }
 
 StudentUndo::Action StudentUndo::get(int& row, int& col, int& count, std::string& text) {
+    // define the return action
     Action retAction;
+    // return error if empty
     if (undoStack.empty())
     {
         return Undo::Action::ERROR;
     }
+    // record the top of the stack
     undoObj* topUndo = undoStack.top();
     Action topAction = topUndo->action;
     switch (topAction)
@@ -124,14 +134,13 @@ StudentUndo::Action StudentUndo::get(int& row, int& col, int& count, std::string
             break;
         case Undo::JOIN:
             retAction = Undo::SPLIT;
-            // delete at end of line
             if (topUndo->lastEdited == "")
             {
                 // do nothing
             }
             else if (topUndo->lastEdited == "\n")    //backspace at front of line
             {
-                // do nothing?
+                // do nothing
             }
             count = 1;
 
@@ -143,14 +152,14 @@ StudentUndo::Action StudentUndo::get(int& row, int& col, int& count, std::string
             retAction = Undo::Action::ERROR;
             break;
     }
+    // pop off the stack
     undoStack.pop();
 
-    return retAction;  // TODO
+    return retAction;
 
 }
 
 void StudentUndo::clear() {
-	// TODO
     // while not empty, pop off the undo objects
     while (!undoStack.empty())
     {

@@ -16,6 +16,7 @@ private:
     bool batchIns = false;
     bool batchSplit = false;
     bool batchDel = false;
+    // define undoObj struct
     struct undoObj
     {
     public:
@@ -35,7 +36,6 @@ private:
     };
     void setFalse(bool one, bool two) {one = false; two = false;}
     std::stack<undoObj*> undoStack;
-    int updatedCol;
 
 };
 

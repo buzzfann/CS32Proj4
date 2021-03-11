@@ -21,12 +21,14 @@ public:
 	void spellCheckLine(const std::string& line, std::vector<Position>& problems);
 
 private:
-
+    // define node class
     class Node
     {
     public:
         char c;
         bool isWord;
+        // alphabet size apos is alphabet + apostrophe = 27
+        // used arrays
         Node* children[ALPHABET_SIZE_APOS];
         Node(char c)
         {
@@ -38,13 +40,13 @@ private:
             }
         }
     };
-    
+    // define Trie class
     class Trie
     {
     public:
         Trie()
         {
-            m_root = new Node('\0');
+            m_root = new Node('\0');    // null byte
         }
         Node* getRoot() {return m_root;}
         
@@ -53,8 +55,8 @@ private:
     };
     
     Trie* m_trie;
-    bool search(std::string word, Node* root);
-    void deleteNodes(Node* root);
+    bool search(std::string word, Node* root); // search for word in dictionary
+    void deleteNodes(Node* root);               // destructor helper
 };
 
 #endif  // STUDENTSPELLCHECK_H_

@@ -158,7 +158,6 @@ void StudentTextEditor::move(Dir dir) {
 }
 
 void StudentTextEditor::del() {
-	// TODO
     // two cases --> first check to see if at m_col is at the last position in the list
     // it's there, then need to merge that list with next list member
     // erase a member
@@ -168,11 +167,12 @@ void StudentTextEditor::del() {
     if (m_col == (*it).length() && m_row != textList.size()-1) // join lines
     {
         // merge with the next line
-         getUndo()->submit(Undo::Action::JOIN, m_row, (*it).length()-1, ' ');
+        getUndo()->submit(Undo::Action::JOIN, m_row, (*it).length()-1, ' ');
         std::list<std::string>::iterator next = it;
         next++;
         string nextLine = *next;
         textList.erase(next);
+        // merge lines
         *it = *it + nextLine;
         string temp = *it;
         string temp2 = temp.substr(m_col+1);
@@ -194,7 +194,6 @@ void StudentTextEditor::del() {
 }
 
 void StudentTextEditor::backspace() {
-	// TODO
     // two cases --> first check to see if at m_col is at the first position in the list
     // it's there, then need to merge that list and previous member
     // other case
@@ -208,12 +207,13 @@ void StudentTextEditor::backspace() {
         it--;
         string prevLine = *it;
         getUndo()->submit(Undo::Action::JOIN, m_row-1, prevLine.length()-1, ' ');
-        // this captures the line minus the last character (which will be deleted)
+
         if (prevLine[prevLine.length()] == ' ')
         {
             prevLine = prevLine.substr(0, prevLine.length()-1);
         }
         *it = prevLine;
+        // sets m_col if next line isn't zero
         if ((*it).length() != 0)
         {
             m_col = (*it).length();
@@ -239,7 +239,6 @@ void StudentTextEditor::backspace() {
 }
 
 void StudentTextEditor::insert(char ch) {
-	// TODO
     // check if ch is valid
     if (ch > 0)
     {
@@ -258,7 +257,7 @@ void StudentTextEditor::insert(char ch) {
             m_col++;
 
         }
-        else
+        else    //otherwise insert a character
         {
             string temp = *it;
             string temp2 = temp.substr(m_col);
@@ -307,10 +306,12 @@ void StudentTextEditor::getPos(int& row, int& col) const {
 
 int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::string>& lines) const
 {
+    // check valid params
     if (startRow < 0 || numRows < 0 || startRow > textList.size())
     {
         return -1;
     }
+    // clear if startRow = size and return 0
     if (startRow == textList.size())
     {
         lines.clear();
@@ -320,6 +321,7 @@ int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::stri
     std::list<std::string>::const_iterator start = it;
     advance(start, startRow-m_row);
     int n = 0;
+    // loop through and push back lines from start to start + numRows
     for (int i = 0; i < numRows; i++)
     {
         if (start != textList.end())
@@ -335,11 +337,13 @@ int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::stri
 void StudentTextEditor::undo() {
 	// TODO
 
+    // define variables
     int row = 0;
     int col = 0;
     int count = 0;
     string oldText = "";
     Undo::Action job;
+    // get Undo
     job = getUndo()->get(row, col, count, oldText);
     std::list<std::string>::iterator temp = textList.begin();
     // error
@@ -366,6 +370,7 @@ void StudentTextEditor::undo() {
         int i = 0;
         m_col = col;
         m_row = row;
+        // find the row
         for (int i = 0; i < row; i++)
         {
             temp++;
