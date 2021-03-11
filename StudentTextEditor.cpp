@@ -36,6 +36,9 @@ bool StudentTextEditor::load(std::string file) {
         return false;
     }
     reset();
+    getUndo()->clear();
+    // clear the trie
+    
     string s;
     while(getline(infile, s))
     {
@@ -84,11 +87,11 @@ void StudentTextEditor::move(Dir dir) {
             {
                 m_row--;
                 it--;
-            }
-            // check if empty line
-            if ((*it).length() < m_col)
-            {
-                m_col = (*it).length() - 1;
+                // check if empty line
+                if ((*it).length() <= m_col)
+                {
+                    m_col = (*it).length() - 1;
+                }
             }
             break;
         case DOWN:
@@ -98,11 +101,11 @@ void StudentTextEditor::move(Dir dir) {
             {
                 it++;
                 m_row++;
-            }
-            // check if empty line
-            else if ((*it).length() < m_col && (*it).length() >=0)
-            {
-                m_col = (*it).length() - 1;
+                // check if empty line
+                if ((*it).length() <= m_col && (*it).length() >=0)
+                {
+                    m_col = (*it).length() - 1;
+                }
             }
             break;
         case Dir::LEFT:
@@ -158,10 +161,10 @@ void StudentTextEditor::del() {
     // other case
     // just delete a character using substring
     // m_col remains the same
-    if (m_col == (*it).length() - 1 && m_row != textList.size()-1)
+    if (m_col == (*it).length() - 1 && m_row != textList.size()-1) // join lines
     {
         // merge with the next line
-        // getUndo()->submit(Undo::Action::JOIN, m_row, (*it).length(), ' ');
+         getUndo()->submit(Undo::Action::JOIN, m_row, (*it).length(), ' ');
         std::list<std::string>::iterator next = it;
         next++;
         string nextLine = *next;
@@ -176,9 +179,9 @@ void StudentTextEditor::del() {
     {
         return;
     }
-    else
+    else    // normal delete
     {
-        // getUndo()
+        getUndo()->submit(Undo::Action::DELETE, m_row, m_col, (*it).at(m_col));
         (*it).erase((*it).begin() + m_col);
         textList.insert(it, (*it));
         it = textList.erase(it);
@@ -194,22 +197,26 @@ void StudentTextEditor::backspace() {
     // other case
     // just delete a character using substring
     // m_col moves
-    if (m_col == 0 && m_row != 0)
+    if (m_col == 0 && m_row != 0)  // lines join
     {
         //merge list with previous list
         std::list<std::string>::iterator curr = it;
+        string currLine = *curr;
         it--;
         string prevLine = *it;
-//        getUndo()->submit(Undo::Action::JOIN, m_row-1, prevLine.length(), ' ');
+        getUndo()->submit(Undo::Action::JOIN, m_row-1, prevLine.length()-1, ' ');
         // this captures the line minus the last character (which will be deleted)
-        prevLine = prevLine.substr(0, prevLine.length());
+        if (prevLine[prevLine.length()] == ' ')
+        {
+            prevLine = prevLine.substr(0, prevLine.length()-1);
+        }
         *it = prevLine;
         if ((*it).length() != 0)
         {
             m_col = (*it).length();
         }
         // combine it with next line
-        *it = *it + *curr;
+        *it = *it + currLine;
         textList.erase(curr);
         m_row--;
     }
@@ -217,9 +224,9 @@ void StudentTextEditor::backspace() {
     {
         return;
     }
-    else
+    else // normal backspace
     {
-//        getUndo()->submit(Undo::Action::DELETE, m_row, m_col-1, (*it).at(m_col-1);
+        getUndo()->submit(Undo::Action::DELETE, m_row, m_col-1, (*it).at(m_col-1));
         string temp = *it;
         string temp2 = temp.substr(m_col);
         temp = temp.substr(0, m_col-1) + temp2;
@@ -245,8 +252,8 @@ void StudentTextEditor::insert(char ch) {
         temp = temp.substr(0, m_col) + ch + temp2;
         *it = temp;
         m_col++;
+        getUndo()->submit(Undo::Action::INSERT, m_row, m_col - 1, (*it).at(m_col-1));
     }
-    //implement undo
 
 }
 
@@ -255,6 +262,7 @@ void StudentTextEditor::enter() {
     // substring current position-end, then cut that out, then create new member and make *it the substring
     list<string>::iterator getRow = it;
     getRow++;
+    getUndo()->submit(Undo::Action::SPLIT, m_row, m_col, ' ');
     //split up the line
     // if it's not the last on the line
     if (m_col != (*it).length() - 1)
@@ -276,7 +284,6 @@ void StudentTextEditor::enter() {
     m_row++;
     m_col = 0;
     //implement undo
-    //undObj.submit(SPLIT, ...)
 }
 
 void StudentTextEditor::getPos(int& row, int& col) const {
@@ -314,48 +321,56 @@ int StudentTextEditor::getLines(int startRow, int numRows, std::vector<std::stri
 
 void StudentTextEditor::undo() {
 	// TODO
-    // if
+
     int row = 0;
     int col = 0;
     int count = 0;
-    string oldText;
+    string oldText = "";
     Undo::Action job;
     job = getUndo()->get(row, col, count, oldText);
     std::list<std::string>::iterator temp = textList.begin();
-    // insert
-    if (job == Undo::Action::INSERT)
+    // error
+    if (job == Undo::Action::ERROR)
     {
-        // iterate to the row passed
-        for (int i = 0; i < row; i++)
-        {
-            temp++;
-        }
-        temp->insert(col, oldText);
+        return;
+    }
+    // insert
+    else if (job == Undo::Action::INSERT)
+    {
+        m_row = row;
+        m_col = col;
+        *it = (*it).substr(0, m_col) + oldText + (*it).substr(m_col);
+        m_col += count+1;
     }
     // delete
     else if (job == Undo::Action::DELETE)
     {
-        // iterate to the row passed
-        for (int i = 0; i < row; i++)
+        int i = 0;
+        m_col = col;
+        while(i < count)
         {
-            temp++;
+            it->erase(m_col, 1);
+            i++;
+            m_col--;
         }
-        if (col == 0)
+        if (m_col < 0)
         {
-            temp->erase((*temp).begin());
+            m_col = 0;
         }
-        else
-        {
-            temp->erase((*temp).begin() + col - 1);
-        }
+        m_row = row;
     }
     // join
     else if (job == Undo::Action::JOIN)
     {
-        for (int i = 0; i < row; i++)
-        {
-            temp++;
-        }
+        // at row, col, substr up to the pos, then insert a new member in the list
+        // below with the other half  --> check cursors for backspace vs del
+        string line = *it;
+        m_col = col;
+        line = (*it).substr(m_col);
+        (*it) = (*it).substr(0, m_col);
+        it++;
+        textList.emplace(it, line);
+        
         //DO
     }
     // split

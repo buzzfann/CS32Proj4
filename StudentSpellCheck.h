@@ -42,14 +42,11 @@ private:
     class Trie
     {
     public:
-//        Trie* children[ALPHABET_SIZE];
         Trie()
         {
             m_root = new Node('\0');
         }
         Node* getRoot() {return m_root;}
-//        void insert(std::string str);
-//        bool search(std::string str);
         
     private:
         Node* m_root;

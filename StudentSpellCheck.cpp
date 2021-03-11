@@ -102,7 +102,7 @@ bool StudentSpellCheck::search(std::string word, Node* root)
             if (root->children[26] != nullptr)
             {
                 root = root->children[26];
-//                // if at the end of the correct word
+                // if at the end of the correct word
                 if (root->isWord == true && i == word.length()-1)
                 {
                     isIn = true;
@@ -116,7 +116,7 @@ bool StudentSpellCheck::search(std::string word, Node* root)
             if (root->children[word[i] - 'a'] != nullptr)
             {
                 root = root->children[word[i] - 'a'];
-    //            // if at the end of the correct word
+                // if at the end of the correct word
                 if (root->isWord == true && i == word.length()-1)
                 {
                     isIn = true;
@@ -126,38 +126,7 @@ bool StudentSpellCheck::search(std::string word, Node* root)
         }
         break;
     }
-//    root = root->children[0];
-//    cout << root->c << endl;
-//    root = root->children[0];
-//    cout << root->c << endl;
-//    root = root->children['h' - 'a'];
-//    cout << root->c << endl;
-//    root = root->children['s' - 'a'];
-//    cout << root->c << endl;
-//    bool isWord = root->isWord;
-//    cout << isWord << endl;
-    
-    
-//    bool isIn = true;
-//    int i = 0;
-//        while (root->isWord == false && i < word.length())
-//        {
-//            // check if the letter is present as a child
-//            if (root->children[word[i] - 'a'] != nullptr)
-//            {
-//                // does this break out of current iteration of the for loop?
-//                // or the entire loop itself? should i use continue?
-//                i++;
-//                root = root->children[word[i] - 'a'];
-//                continue;
-//            }
-//            // if it's null but you're not at the end of the word
-//            else if (root->children[word[i] - 'a'] == nullptr)
-//            {
-//                isIn = false;
-//                break;
-//            }
-//        }
+
     return isIn;
 }
 

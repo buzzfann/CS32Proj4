@@ -13,15 +13,28 @@ public:
 	void clear();
 
 private:
-    bool batch;
+    bool batchIns = false;
+    bool batchSplit = false;
+    bool batchDel = false;
     struct undoObj
     {
+    public:
+        undoObj(Action action, int row, int col, int count, std::string lastEdited)
+        {
+            this->action = action;
+            e_row = row;
+            e_col = col;
+            this->count = count;
+            this->lastEdited = lastEdited;
+        }
         Action action;
         int e_row;
         int e_col;
-        char lastEdited;
+        int count;
+        std::string lastEdited;
     };
-    std::stack<undoObj> undoStack;
+    void setFalse(bool one, bool two) {one = false; two = false;}
+    std::stack<undoObj*> undoStack;
 
 };
 
