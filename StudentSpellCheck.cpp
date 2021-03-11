@@ -43,6 +43,8 @@ bool StudentSpellCheck::load(std::string dictionaryFile)
         return false;
     }
     string s;
+    deleteNodes(m_trie->getRoot());
+    delete m_trie;
     m_trie = new Trie();
     while (getline(infile, s))
     {
