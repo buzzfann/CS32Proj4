@@ -120,12 +120,13 @@ void StudentTextEditor::move(Dir dir) {
             {
                 m_col--;
             }
+            //move to line before
             else if (m_col == 0 && it != textList.begin())
             {
                 it--;
                 if ((*it).length() != 0)
                 {
-                    m_col = (*it).length() - 1;
+                    m_col = (*it).length();
                 }
                 else
                 {
@@ -138,7 +139,7 @@ void StudentTextEditor::move(Dir dir) {
         case Dir::RIGHT:
             tempIt = it;
             tempIt++;
-            if (m_col < (*it).length() - 1 && (*it).length() != 0)
+            if (m_col < (*it).length() && (*it).length() != 0)
             {
                 m_col++;
             }
@@ -165,10 +166,10 @@ void StudentTextEditor::del() {
     // other case
     // just delete a character using substring
     // m_col remains the same
-    if (m_col == (*it).length() - 1 && m_row != textList.size()-1) // join lines
+    if (m_col == (*it).length() && m_row != textList.size()-1) // join lines
     {
         // merge with the next line
-         getUndo()->submit(Undo::Action::JOIN, m_row, (*it).length(), ' ');
+         getUndo()->submit(Undo::Action::JOIN, m_row, (*it).length()-1, ' ');
         std::list<std::string>::iterator next = it;
         next++;
         string nextLine = *next;
@@ -176,7 +177,7 @@ void StudentTextEditor::del() {
         *it = *it + nextLine;
         string temp = *it;
         string temp2 = temp.substr(m_col+1);
-        temp = temp.substr(0, m_col) + temp2;
+        temp = temp.substr(0, m_col+1) + temp2;
         *it = temp;
     }
     else if (m_col == (*it).length() && m_row == textList.size()-1)
@@ -247,14 +248,26 @@ void StudentTextEditor::insert(char ch) {
         if (ch == '\t')
         {
             (*it).insert(m_col, 4, ' ');
-            m_col += 4;
+            // this will make it so each tab can be undone in one ctrl-z
+            getUndo()->submit(Undo::Action::INSERT, m_row, m_col, (*it).at(m_col));
+            m_col++;
+            getUndo()->submit(Undo::Action::INSERT, m_row, m_col, (*it).at(m_col));
+            m_col++;
+            getUndo()->submit(Undo::Action::INSERT, m_row, m_col, (*it).at(m_col));
+            m_col++;
+            getUndo()->submit(Undo::Action::INSERT, m_row, m_col, (*it).at(m_col));
+            m_col++;
+
         }
-        string temp = *it;
-        string temp2 = temp.substr(m_col);
-        temp = temp.substr(0, m_col) + ch + temp2;
-        *it = temp;
-        getUndo()->submit(Undo::Action::INSERT, m_row, m_col, (*it).at(m_col));
-        m_col++;
+        else
+        {
+            string temp = *it;
+            string temp2 = temp.substr(m_col);
+            temp = temp.substr(0, m_col) + ch + temp2;
+            *it = temp;
+            getUndo()->submit(Undo::Action::INSERT, m_row, m_col, (*it).at(m_col));
+            m_col++;
+        }
     }
 
 }
@@ -374,30 +387,37 @@ void StudentTextEditor::undo() {
     // join
     else if (job == Undo::Action::JOIN)
     {
+        // find the row
+        m_col = col;
+        m_row = row;
+        for (int i = 0; i < m_row; i++)
+        {
+            temp++;
+        }
+        it = temp;
+        temp++;
+        string next = *temp;
+        *it = *it + next;
+        textList.erase(temp);
+        //DO
+    }
+    // split
+    else if (job == Undo::Action::SPLIT)
+    {
         // at row, col, substr up to the pos, then insert a new member in the list
         // below with the other half  --> check cursors for backspace vs del
         string line = *it;
-        m_col = col;
-        for (int i = 0; i < row; i++)
+        m_col = col+1;
+        m_row = row;
+        for (int i = 0; i < m_row; i++)
         {
             temp++;
         }
         it = temp;
         line = (*it).substr(m_col);
         (*it) = (*it).substr(0, m_col);
-        it++;
-        textList.emplace(it, line);
-        
-        //DO
-    }
-    // split
-    else if (job == Undo::Action::SPLIT)
-    {
-        for (int i = 0; i < row; i++)
-        {
-            temp++;
-        }
-        //DO
+        temp++;
+        textList.emplace(temp, line);
     }
     // if it's error
     else
