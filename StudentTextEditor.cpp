@@ -37,7 +37,6 @@ bool StudentTextEditor::load(std::string file) {
     }
     reset();
     getUndo()->clear();
-    // clear the trie
     
     string s;
     while(getline(infile, s))
@@ -88,9 +87,13 @@ void StudentTextEditor::move(Dir dir) {
                 m_row--;
                 it--;
                 // check if empty line
-                if ((*it).length() <= m_col)
+                if ((*it).length() <= m_col && (*it).length() != 0)
                 {
                     m_col = (*it).length() - 1;
+                }
+                else if ((*it).length() <= 0)
+                {
+                    m_col = 0;
                 }
             }
             break;
@@ -102,9 +105,13 @@ void StudentTextEditor::move(Dir dir) {
                 it++;
                 m_row++;
                 // check if empty line
-                if ((*it).length() <= m_col && (*it).length() >=0)
+                if ((*it).length() <= m_col && (*it).length() > 0)
                 {
                     m_col = (*it).length() - 1;
+                }
+                else if ((*it).length() <= 0)
+                {
+                    m_col = 0;
                 }
             }
             break;
@@ -147,9 +154,6 @@ void StudentTextEditor::move(Dir dir) {
             break;
         case Dir::END:
             break;
-
-        default:
-            break;
     }
 }
 
@@ -187,7 +191,6 @@ void StudentTextEditor::del() {
         it = textList.erase(it);
         it--;
     }
-    //implement undo
 }
 
 void StudentTextEditor::backspace() {
@@ -233,7 +236,6 @@ void StudentTextEditor::backspace() {
         *it = temp;
         m_col--;
     }
-    //implement undo
 }
 
 void StudentTextEditor::insert(char ch) {
@@ -251,8 +253,8 @@ void StudentTextEditor::insert(char ch) {
         string temp2 = temp.substr(m_col);
         temp = temp.substr(0, m_col) + ch + temp2;
         *it = temp;
+        getUndo()->submit(Undo::Action::INSERT, m_row, m_col, (*it).at(m_col));
         m_col++;
-        getUndo()->submit(Undo::Action::INSERT, m_row, m_col - 1, (*it).at(m_col-1));
     }
 
 }
@@ -283,7 +285,6 @@ void StudentTextEditor::enter() {
     // increment the row, set m_col to zero
     m_row++;
     m_col = 0;
-    //implement undo
 }
 
 void StudentTextEditor::getPos(int& row, int& col) const {
@@ -339,25 +340,36 @@ void StudentTextEditor::undo() {
     {
         m_row = row;
         m_col = col;
+        for (int i = 0; i < row; i++)
+        {
+            temp++;
+        }
+        it = temp;
         *it = (*it).substr(0, m_col) + oldText + (*it).substr(m_col);
-        m_col += count+1;
+        m_col += count;
     }
     // delete
     else if (job == Undo::Action::DELETE)
     {
         int i = 0;
         m_col = col;
+        m_row = row;
+        for (int i = 0; i < row; i++)
+        {
+            temp++;
+        }
+        it = temp;
         while(i < count)
         {
-            it->erase(m_col, 1);
+            (*temp).erase(m_col, 1);
             i++;
             m_col--;
         }
+        m_col++;
         if (m_col < 0)
         {
             m_col = 0;
         }
-        m_row = row;
     }
     // join
     else if (job == Undo::Action::JOIN)
@@ -366,6 +378,11 @@ void StudentTextEditor::undo() {
         // below with the other half  --> check cursors for backspace vs del
         string line = *it;
         m_col = col;
+        for (int i = 0; i < row; i++)
+        {
+            temp++;
+        }
+        it = temp;
         line = (*it).substr(m_col);
         (*it) = (*it).substr(0, m_col);
         it++;
@@ -387,5 +404,4 @@ void StudentTextEditor::undo() {
     {
         return;
     }
-    
 }

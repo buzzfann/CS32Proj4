@@ -35,6 +35,7 @@ private:
     };
     void setFalse(bool one, bool two) {one = false; two = false;}
     std::stack<undoObj*> undoStack;
+    int updatedCol;
 
 };
 
